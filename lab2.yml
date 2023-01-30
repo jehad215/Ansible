@@ -1,0 +1,124 @@
+---
+- name: Install and start httpd on ubunto and centos using playbook
+  hosts: all
+  vars_files:
+    - lab2vars.yml
+   
+  tasks:
+   - name: this task to create index file
+     file:
+      path: /home/jeadmin/index.html
+      state: touch
+   - name: append 'Hello World'
+     lineinfile:
+      path: /home/jeadmin/index.html
+      line: "<h1>{{ welcome }}</h1>"
+   - name: install httpd on centos
+     yum:
+       name: "{{ h }}"
+       state: present
+     when: ansible_os_family == "RedHat"
+     tags: install {{ h }} on centos
+   - name: this task to start service
+     service:
+       name: "{{ h }}"
+       state: started
+     when: ansible_os_family == "RedHat"
+     tags: start {{ h }} on centos
+   - name: this task to install apache2 on ubuntu
+     apt:
+       name: "{{ a }}"
+       state: present
+     when: ansible_os_family == "Debian"
+     tags: install {{ a }} on ubuntu
+   - name: start service on ubuntu
+     service:
+       name: "{{ a }}"
+       state: started
+     when: ansible_os_family == "Debian"
+     tags: start {{ a }} on ubuntu
+   - name: copy index.html
+     copy:
+      src: /home/jeadmin/index.html
+      dest: /var/www/html/index.html
+      remote_src: yes
+  handlers:
+   - name: restart-httpd
+     service:
+      name: httpd
+      state: restarted
+     when: ansible_os_family == "RedHat"
+     tags: restart {{ h }} on centos
+  handlers:
+   - name: restart-apache
+     service:
+      name: apache
+      state: restarted
+     when: ansible_os_family == "Debian"
+     tags: start {{ a }} on ubuntu
+
+
+
+
+#We can also declar variables in the same yml file 
+
+
+# ---
+# - name: Install and start httpd on ubunto and centos using playbook
+#   hosts: all
+#   vars:
+#     h: httpd
+#     a: apache2
+#     welcome: I'm Jehad Musa, This is my final Ansible lab
+#   tasks:
+#    - name: this task to create index file
+#      file:
+#       path: /home/jeadmin/index.html
+#       state: touch
+#    - name: append 'Hello World'
+#      lineinfile:
+#       path: /home/jeadmin/index.html
+#       line: "<h1>{{ welcome }}</h1>"
+#    - name: install httpd on centos
+#      yum:
+#        name: "{{ h }}"
+#        state: present
+#      when: ansible_os_family == "RedHat"
+#      tags: install {{ h }} on centos
+#    - name: this task to start service
+#      service:
+#        name: "{{ h }}"
+#        state: started
+#      when: ansible_os_family == "RedHat"
+#      tags: start {{ h }} on centos
+#    - name: this task to install apache2 on ubuntu
+#      apt:
+#        name: "{{ a }}"
+#        state: present
+#      when: ansible_os_family == "Debian"
+#      tags: install {{ a }} on ubuntu
+#    - name: start service on ubuntu
+#      service:
+#        name: "{{ a }}"
+#        state: started
+#      when: ansible_os_family == "Debian"
+#      tags: start {{ a }} on ubuntu
+#    - name: copy index.html
+#      copy:
+#       src: /home/jeadmin/index.html
+#       dest: /var/www/html/index.html
+#       remote_src: yes
+#   handlers:
+#    - name: restart-httpd
+#      service:
+#       name: httpd
+#       state: restarted
+#      when: ansible_os_family == "RedHat"
+#      tags: restart {{ h }} on centos
+#   handlers:
+#    - name: restart-apache
+#      service:
+#       name: apache
+#       state: restarted
+#      when: ansible_os_family == "Debian"
+#      tags: start {{ a }} on ubuntu
